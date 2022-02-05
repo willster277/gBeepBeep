@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <bitset>
 #include <string>
 
 using namespace std;
@@ -7,7 +8,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
   string beepOutPut = "";
-  // print arc and argv
+  bool doBeepsOut = false;
   for (int i = 1; i < argc; i++)
   {
     // try read the file at argv[i]
@@ -41,7 +42,8 @@ int main(int argc, char **argv)
         return 1;
       }
       // if the line does not read "beep", throw BeepSyntaxException
-      if (line != "beep") {
+      if (line != "beep" && (line.substr(0, 6) != "beep \""))
+      {
         cout << "BeepSyntaxException: Syntax error at line " << lineCount + 1
              << ": " << fileName << endl;
         cout << "Expected 'beep' but found '" << line << "'" << endl;
@@ -49,7 +51,32 @@ int main(int argc, char **argv)
       }
       // increment lineCount and append beep
       lineCount++;
-      beepOutPut += "beep\n";
+      if (line.substr(0, 6) != "beep \"" && doBeepsOut)
+      {
+        beepOutPut += "beep\n";
+      }
+      else
+      {
+        string printed = line.substr(6);
+        printed = printed.substr(0, printed.length() - 1);
+        // convert printed to binary string
+        for (int i = 0; i < printed.length(); i++)
+        {
+          std::bitset<8UL> charcodeBinary = bitset<8>(printed[i]);
+          // for each bit in charcodeBinary, append to beepOutPut "beep\n" if 1 else "\n"
+          for (int j = 7; j >= 0; j--)
+          {
+            if (charcodeBinary[j] == 1)
+            {
+              beepOutPut += "beep\n";
+            }
+            else
+            {
+              beepOutPut += "\n";
+            }
+          }
+        }
+      }
     }
     // if lineCount was not incremented, append blank
     if (lineCount == 0)
